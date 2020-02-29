@@ -101,15 +101,18 @@ class Window() :
 		for i in range(0  , len(L) , 2):
 			X.append(float(L[i].replace(',' , ".")))
 			Y.append(float(L[i+1].replace(',' , ".")))
-		self.drawcourbe(X , Y)
+		self.drawcourbe(X , Y  , title = "cootdonnes de Xy de la naca : " + typ)
 
 
 	def request(self , typ , x , y , renolds) : 
 		"""request the database for the coordinates """
 		if not typ  : 
 			self.label_error["text"] = "Please enter a hydrofoil profil"
-		command = f"select  {self.dic[x]} ,  {self.dic[y]} from {self.tableau}  where nomprofil = '{typ}' and Re = {renolds} ;"
-		print(command)
+		command = f"""
+		select  {self.dic[x]} ,  {self.dic[y]}
+		 from {self.tableau}
+		   where nomprofil = '{typ}' and Re = {renolds} ;"""
+		# print(command)
 		self.cur.execute(command)
 		try  :
 			L = self.cur.fetchone()
@@ -123,10 +126,11 @@ class Window() :
 		Y = [float(e) for e in Y]
 		X = [e.replace("," , '.' ) for e in X]
 		X = [float(e) for e in X]
-		self.drawcourbe(X , Y)
+		self.drawcourbe(X , Y , title = y + "= F(" + x + ") à Re :" + str(renolds)  )
 
-	def drawcourbe(self , x , y) : 
+	def drawcourbe(self , x , y , title = "" ) : 
 		self.fig = Figure(figsize=(7, 5), dpi=100)
+		self.fig.suptitle(title)
 		self.graph_frame = tk.Frame(self.root)
 		self.canvas = FigureCanvasTkAgg(self.fig, master = self.graph_frame)
 		self.sub = self.fig.add_subplot(111)
@@ -142,13 +146,8 @@ class Window() :
 		self.root.geometry("400x400")
 		self.toolbar = NavigationToolbar2Tk(self.canvas, self.graph_frame)
 		self.toolbar.update()
-		self.canvas.mpl_connect("button_press_event", self.on_button_press)
 		self.canvas.get_tk_widget().pack(side = tk.TOP ,fill = tk.BOTH  ,  expand = True)
 		self.graph_frame.pack()
-
-	def on_button_press(self , event = None) : 
-		if event.dblclick  : 
-			self.canvas.mpl_connect("resize_event" , None )
 
 
 if __name__ == '__main__':
